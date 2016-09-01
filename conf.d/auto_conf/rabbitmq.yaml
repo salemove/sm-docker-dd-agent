@@ -1,0 +1,14 @@
+docker_images:
+  - rabbitmq
+
+init_config:
+
+instances:
+  - rabbitmq_api_url: http://%%host%%:%%port_4%%/api/
+    rabbitmq_user: guest
+    rabbitmq_pass: guest
+
+    # skip queues with auto-generated name
+    queues_regexes:
+    - ^(?!.*amq.gen).*$
+
