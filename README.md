@@ -1,1 +1,1 @@
-# sm-docker-dd-agent
+# DataDog Agent Dockerfile with additional checks
