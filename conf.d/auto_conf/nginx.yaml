@@ -1,0 +1,7 @@
+docker_images:
+  - gateway
+
+init_config:
+
+instances:
+  - nginx_status_url: http://%%host%%:%%port_0%%/nginx_status/
