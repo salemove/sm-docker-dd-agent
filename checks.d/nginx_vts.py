@@ -28,6 +28,9 @@ METRIC_TYPES = {
     'usedSize':     'gauge'
 }
 
+def lreplace(s, old, new):
+    return re.sub(r'^(?:%s)+' % re.escape(old), lambda m: new * (m.end() / len(old)), s)
+
 class NginxVts(AgentCheck):
     """Tracks nginx metrics via virtual host traffic status module
 
@@ -107,9 +110,10 @@ class NginxVts(AgentCheck):
         for key in tagged_keys:
             metric_name = '%s.%s' % (metric_base, key)
             for tag_val, data in parsed.get(key, {}).iteritems():
+
                 # skip total values
                 if tag_val != '*':
-                    tag = '%s:%s' % (key, tag_val)
+                    tag = '%s:%s' % (key, lreplace(tag_val,':','_'))
                     output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
 
         # Process the rest of the keys
