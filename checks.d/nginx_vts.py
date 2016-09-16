@@ -15,6 +15,18 @@ import simplejson as json
 from checks import AgentCheck
 from util import headers
 
+METRIC_TYPES = {
+    'responseMsec': 'gauge',
+    'weight':       'gauge',
+    'maxFails':     'gauge',
+    'failTimeout':  'gauge',
+    'backup':       'gauge',
+    'down':         'gauge',
+    'loadMsec':     'gauge',
+    'nowMsec':      'gauge',
+    'maxSize':      'gauge',
+    'usedSize':     'gauge'
+}
 
 class NginxVts(AgentCheck):
     """Tracks nginx metrics via virtual host traffic status module
@@ -143,9 +155,9 @@ class NginxVts(AgentCheck):
                 val = 1
             else:
                 val = 0
-            output.append((metric_base, val, tags, 'gauge'))
+            output.append((metric_base, val, tags, METRIC_TYPES.get(metric_base.split('.')[-1], 'rate')))
 
         elif isinstance(val, (int, float, long)):
-            output.append((metric_base, val, tags, 'gauge'))
+            output.append((metric_base, val, tags, METRIC_TYPES.get(metric_base.split('.')[-1], 'rate')))
 
         return output
