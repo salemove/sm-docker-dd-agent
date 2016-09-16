@@ -107,8 +107,10 @@ class NginxVts(AgentCheck):
         for key in tagged_keys:
             metric_name = '%s.%s' % (metric_base, key)
             for tag_val, data in parsed.get(key, {}).iteritems():
-                tag = '%s:%s' % (key, tag_val)
-                output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
+                # skip total values
+                if tag_val != '*':
+                    tag = '%s:%s' % (key, tag_val)
+                    output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
 
         # Process the rest of the keys
         rest = set(all_keys) - set([k for k in tagged_keys])
