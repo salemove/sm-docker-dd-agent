@@ -1,6 +1,7 @@
 FROM datadog/docker-dd-agent:11.2.585
 
 ADD conf.d/ /etc/dd-agent/conf.d/
+ADD checks.d/ /etc/dd-agent/checks.d/
 
 COPY entrypoint-wrapper.sh /entrypoint-wrapper.sh
 

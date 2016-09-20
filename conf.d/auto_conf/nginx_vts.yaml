@@ -1,0 +1,8 @@
+docker_images:
+  - docker-nginx-vts
+  - gateway
+
+init_config:
+
+instances:
+  - nginx_vts_url: http://%%host%%:%%port_0%%/nginx_vts/
