@@ -1,4 +1,4 @@
-FROM datadog/docker-dd-agent:11.2.585
+FROM datadog/docker-dd-agent:11.0.591
 
 ADD conf.d/ /etc/dd-agent/conf.d/
 ADD checks.d/ /etc/dd-agent/checks.d/
