@@ -6,6 +6,15 @@ FROM datadog/docker-dd-agent:11.0.5100
 ADD conf.d/ /etc/dd-agent/conf.d/
 ADD checks.d/ /etc/dd-agent/checks.d/
 
+# Apply patches
+ADD patches/*.patch /tmp/
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y patch \
+ && (for p in `ls /tmp/*.patch`; do echo "Applying: $p"; patch -p1 < $p || exit 1; done) \
+ && apt-get remove -y --force-yes patch \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 COPY entrypoint-wrapper.sh /entrypoint-wrapper.sh
 
 ENTRYPOINT ["/entrypoint-wrapper.sh"]
