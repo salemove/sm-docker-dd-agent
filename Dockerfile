@@ -1,11 +1,19 @@
-FROM datadog/docker-dd-agent:11.0.591
+FROM datadog/docker-dd-agent:11.0.5100
 
 # Add some new features and fixes from upsteam
 # Not very elegant, but it is easier than creating custom deb package
-ADD opt/ /opt/
 
 ADD conf.d/ /etc/dd-agent/conf.d/
 ADD checks.d/ /etc/dd-agent/checks.d/
+
+# Apply patches
+ADD patches/*.patch /tmp/
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y patch \
+ && (for p in `ls /tmp/*.patch`; do echo "Applying: $p"; patch -p1 < $p || exit 1; done) \
+ && apt-get remove -y --force-yes patch \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY entrypoint-wrapper.sh /entrypoint-wrapper.sh
 
