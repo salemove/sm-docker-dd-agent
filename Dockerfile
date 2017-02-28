@@ -1,4 +1,4 @@
-FROM datadog/docker-dd-agent:11.0.5100
+FROM datadog/docker-dd-agent:11.0.5112
 
 # Add some new features and fixes from upsteam
 # Not very elegant, but it is easier than creating custom deb package
