@@ -1,0 +1,14 @@
+diff --git a/opt/datadog-agent/agent/utils/service_discovery/sd_docker_backend.py b/opt/datadog-agent/agent/utils/service_discovery/sd_docker_backend.py
+index e54816c..327e2fa 100644
+--- a/opt/datadog-agent/agent/utils/service_discovery/sd_docker_backend.py
++++ b/opt/datadog-agent/agent/utils/service_discovery/sd_docker_backend.py
+@@ -253,6 +253,9 @@ class SDDockerBackend(AbstractSDBackend):
+                             " Kubernetes tags may be missing." % c_id[:12])
+                 return []
+ 
++            # get pod name
++            tags.append('kube_pod_name:%s' % pod_metadata.get('name'))
++
+             # get pod labels
+             kube_labels = pod_metadata.get('labels', {})
+             for label, value in kube_labels.iteritems():
