@@ -17,6 +17,7 @@ from util import headers
 
 METRIC_TYPES = {
     'responseMsec': 'gauge',
+    'requestMsec':  'gauge',
     'weight':       'gauge',
     'maxFails':     'gauge',
     'failTimeout':  'gauge',
