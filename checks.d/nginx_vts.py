@@ -17,6 +17,7 @@ from util import headers
 
 METRIC_TYPES = {
     'responseMsec': 'gauge',
+    'requestMsec':  'gauge',
     'weight':       'gauge',
     'maxFails':     'gauge',
     'failTimeout':  'gauge',
@@ -139,6 +140,10 @@ class NginxVts(AgentCheck):
                 else:
                     tags = tags + [server]
             for key, val2 in val.iteritems():
+                # Skip requestMsecs and responseMsecs, no good way to show them in DataDog
+                if key in ['requestMsecs','responseMsecs']:
+                    continue
+
                 if key != 'overCounts':
 
                     # Handle overcounts
