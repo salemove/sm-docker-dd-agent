@@ -5,3 +5,4 @@ instances:
     excluded_interfaces:
       - lo
       - lo0
+    excluded_interface_re: veth.*
