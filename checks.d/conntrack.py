@@ -16,22 +16,11 @@ class Conntrack(AgentCheck):
             self.gauge(metric_key, value)
 
     def _get_sysctl_metrics(self):
-        sysctl = sp.Popen(['sysctl', 'net.netfilter.nf_conntrack_max',
-                           'net.netfilter.nf_conntrack_count'],
+        sysctl = sp.Popen(['cat', '/proc/sys/net/netfilter/nf_conntrack_count',
+                           '/proc/sys/net/netfilter/nf_conntrack_max'],
                           stdout=sp.PIPE, close_fds=True).communicate()[0]
-        #
-        # net.netfilter.nf_conntrack_max = 1000000
-        # net.netfilter.nf_conntrack_count = 56
-        #
         lines = sysctl.split('\n')
-        regexp = re.compile(r'^net\.netfilter\.nf_(\w+)\s+=\s+([0-9]+)')
         conntrack_info = {}
-        for line in lines:
-            try:
-                match = re.search(regexp, line)
-                if match is not None:
-                    conntrack_info[match.group(1)] = match.group(2)
-            except Exception:
-                self.log.exception("Cannot parse %s" % (line,))
-
+        conntrack_info['conntrack_count'] = lines[0]
+        conntrack_info['conntrack_max'] = lines[1]
         return conntrack_info
