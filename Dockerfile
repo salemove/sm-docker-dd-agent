@@ -15,6 +15,9 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# required for reporting conntrack_insert_failed and conntrack_drop metrics
+RUN apt-get install -y --no-install-recommends conntrack
+
 COPY entrypoint-wrapper.sh /entrypoint-wrapper.sh
 
 ENTRYPOINT ["/entrypoint-wrapper.sh"]
