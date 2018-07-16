@@ -9,7 +9,7 @@ ADD checks.d/ /etc/dd-agent/checks.d/
 # Apply patches
 ADD patches/*.patch /tmp/
 RUN apt-get update \
- && apt-get install --no-install-recommends -y patch \
+ && apt-get install --no-install-recommends -y patch netbase \
  && (for p in `ls /tmp/*.patch`; do echo "Applying: $p"; patch -p1 < $p || exit 1; done) \
  && apt-get remove -y --force-yes patch \
  && apt-get clean \
