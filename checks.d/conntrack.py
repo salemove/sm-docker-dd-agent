@@ -1,56 +1,52 @@
 """
-Linux conntrack metrics (AWS NAT Instance)
+Linux conntrack metrics (AWS Instance)
+
+User must must be root or have CAP_NET_ADMIN capability to use this. In
+kubernetes, the capability can be given to the container by specifying the
+following securityContext for it.
+
+```
+securityContext:
+  capabilities:
+    add: ["NET_ADMIN"]
+```
 """
 
 import subprocess as sp
 import re
 from checks import AgentCheck
 
-
 class Conntrack(AgentCheck):
-
     def check(self, instance):
-        conntrack_info = self._get_sysctl_metrics()
-        for metric, value in conntrack_info.iteritems():
-            metric_key = "system.net.nf.%s" % (metric)
-            self.gauge(metric_key, value)
+        for name, value, tags in self._get_conntrack_metrics().iteritems():
+            metric_key = "system.net.nf.conntrack_%s" % (name)
+            self.gauge(metric_key, value, tags)
 
-    def _get_sysctl_metrics(self):
+    def _get_conntrack_metrics(self):
         sysctl = sp.Popen(['cat', '/proc/sys/net/netfilter/nf_conntrack_count',
                            '/proc/sys/net/netfilter/nf_conntrack_max'],
                           stdout=sp.PIPE, close_fds=True).communicate()[0]
         sysctl_lines = sysctl.split('\n')
-        conntrack_info = {}
-        conntrack_info['conntrack_count'] = sysctl_lines[0]
-        conntrack_info['conntrack_max'] = sysctl_lines[1]
+        sysctl_results = [('count', sysctl_lines[0], []),
+                          ('max', sysctl_lines[1], [])]
 
         conntrack = sp.Popen(['conntrack', '-S'],
-                          stdout=sp.PIPE, close_fds=True).communicate()[0]
+                             stdout=sp.PIPE, close_fds=True).communicate()[0]
         # Sample output:
-        # entries   		8112
-        # searched  		0
-        # found     		72556
-        # new       		0
-        # invalid   		3828562
-        # ignore    		13996314
-        # delete    		0
-        # delete_list		0
-        # insert    		0
-        # insert_failed		12783
-        # drop      		12783
-        # early_drop		0
-        # icmp_error		1
-        # expect_new		0
-        # expect_create		0
-        # expect_delete		0
-        # search_restart		32917695
-        conntrack_lines = conntrack.split('\n')
-        regexp = re.compile(r'^(\w+)\s+([0-9]+)')
-        for line in conntrack_lines:
-            try:
-                match = re.search(regexp, line)
-                if match is not None:
-                    conntrack_info['conntrack_{}'.format(match.group(1))] = match.group(2)
-            except Exception:
-                self.log.exception("Cannot parse %s" % (line,))
-        return conntrack_info
+        # cpu=0           found=0 invalid=7796 ignore=16110 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=671
+        # cpu=1           found=0 invalid=7234 ignore=15503 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=575
+        # cpu=2           found=0 invalid=6589 ignore=16296 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=596
+        # cpu=3           found=387 invalid=80384 ignore=17594 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=3923
+        line_regex = re.compile(r'^cpu=(\d)+\s+([\w=\s]+)$')
+        param_regex = re.compile(r'(\w+)=(\d+)')
+
+        try:
+            return sysctl_results + [(name, value, tags)
+                                     for line in conntrack.split('\n')
+                                     for cpu, params in [re.match(line_regex, line).groups()]
+                                     for tags in ['cpu:'+cpu]
+                                     for name, value in re.findall(param_regex, params)]
+        except Exception:
+            self.log.exception("Cannot parse %s" % (conntrack))
+            return sysctl_results
+
