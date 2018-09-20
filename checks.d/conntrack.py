@@ -18,7 +18,7 @@ from checks import AgentCheck
 
 class Conntrack(AgentCheck):
     def check(self, instance):
-        for name, value, tags in self._get_conntrack_metrics().iteritems():
+        for name, value, tags in self._get_conntrack_metrics():
             metric_key = "system.net.nf.conntrack_%s" % (name)
             self.gauge(metric_key, value, tags)
 
@@ -37,13 +37,14 @@ class Conntrack(AgentCheck):
         # cpu=1           found=0 invalid=7234 ignore=15503 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=575
         # cpu=2           found=0 invalid=6589 ignore=16296 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=596
         # cpu=3           found=387 invalid=80384 ignore=17594 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=3923
-        line_regex = re.compile(r'^cpu=(\d)+\s+([\w=\s]+)$')
+        line_regex = re.compile(r'^\s*cpu=(\d)+\s+([\w=\s]+)$')
         param_regex = re.compile(r'(\w+)=(\d+)')
 
         try:
             return sysctl_results + [(name, value, tags)
                                      for line in conntrack.split('\n')
-                                     for cpu, params in [re.match(line_regex, line).groups()]
+                                     for match in [re.match(line_regex, line)] if match
+                                     for cpu, params in [match.groups()]
                                      for tags in ['cpu:'+cpu]
                                      for name, value in re.findall(param_regex, params)]
         except Exception:
