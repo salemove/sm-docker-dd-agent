@@ -12,9 +12,9 @@ securityContext:
 ```
 """
 
-import subprocess as sp
 import re
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.subprocess_output import get_subprocess_output
 
 class Conntrack(AgentCheck):
     def check(self, instance):
@@ -23,15 +23,18 @@ class Conntrack(AgentCheck):
             self.gauge(metric_key, value, tags)
 
     def _get_conntrack_metrics(self):
-        sysctl = sp.Popen(['cat', '/proc/sys/net/netfilter/nf_conntrack_count',
-                           '/proc/sys/net/netfilter/nf_conntrack_max'],
-                          stdout=sp.PIPE, close_fds=True).communicate()[0]
+        sysctl, err, retcode = get_subprocess_output([
+            'cat',
+            '/proc/sys/net/netfilter/nf_conntrack_count',
+            '/proc/sys/net/netfilter/nf_conntrack_max'
+        ], self.log, raise_on_empty_output=True)
         sysctl_lines = sysctl.split('\n')
         sysctl_results = [('count', sysctl_lines[0], []),
                           ('max', sysctl_lines[1], [])]
 
-        conntrack = sp.Popen(['conntrack', '-S'],
-                             stdout=sp.PIPE, close_fds=True).communicate()[0]
+        conntrack, err, retcode = get_subprocess_output([
+            'conntrack', '-S'
+        ], self.log, raise_on_empty_output=True)
         # Sample output:
         # cpu=0           found=0 invalid=7796 ignore=16110 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=671
         # cpu=1           found=0 invalid=7234 ignore=15503 insert=0 insert_failed=0 drop=0 early_drop=0 error=0 search_restart=575
