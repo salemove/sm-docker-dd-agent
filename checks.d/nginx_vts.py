@@ -5,22 +5,15 @@
 
 # stdlib
 import re
-import urlparse
+from urllib.parse import urlparse
 
 # 3rd party
 import requests
 import simplejson as json
 
 # project
-from util import headers
-
-# the following try/except block will make the custom check compatible with any Agent version
-try:
-    # first, try to import the base class from new versions of the Agent...
-    from datadog_checks.base import AgentCheck
-except ImportError:
-    # ...if the above failed, the check is running in Agent version < 6.6.0
-    from checks import AgentCheck
+from datadog_checks.base.utils.headers import headers
+from datadog_checks.base.checks import AgentCheck
 
 METRIC_TYPES = {
     'responseMsec': 'gauge',
@@ -68,7 +61,7 @@ class NginxVts(AgentCheck):
                 name, value, tags, metric_type = row
                 func = funcs[metric_type]
                 func(name, value, tags)
-            except Exception, e:
+            except Exception as e:
                 self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
 
     def _get_data(self, instance):
@@ -80,7 +73,7 @@ class NginxVts(AgentCheck):
             auth = (instance['user'], instance['password'])
 
         # Submit a service check for status page availability.
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
         nginx_host = parsed_url.hostname
         nginx_port = parsed_url.port or 80
         service_check_name = 'nginx_vts.can_connect'
@@ -134,9 +127,9 @@ class NginxVts(AgentCheck):
 
     @classmethod
     def _flatten_json(cls, metric_base, val, tags):
-        ''' Recursively flattens the nginx json object. Returns the following:
+        """ Recursively flattens the nginx json object. Returns the following:
             [(metric_name, value, tags)]
-        '''
+        """
         output = []
         if isinstance(val, dict):
             # Pull out the server as a tag instead of trying to read as a metric
@@ -148,17 +141,17 @@ class NginxVts(AgentCheck):
                     tags = tags + [server]
             for key, val2 in val.iteritems():
                 # Skip requestMsecs and responseMsecs, no good way to show them in DataDog
-                if key in ['requestMsecs','responseMsecs']:
+                if key in ['requestMsecs', 'responseMsecs']:
                     continue
 
                 if key != 'overCounts':
 
                     # Handle overcounts
-                    if key in ['requestCounter','inBytes','outBytes']:
-                        val2 = val2 + long(val['overCounts']['maxIntegerSize']) * val['overCounts'][key]
+                    if key in ['requestCounter', 'inBytes', 'outBytes']:
+                        val2 = val2 + int(val['overCounts']['maxIntegerSize']) * val['overCounts'][key]
                     if key == 'responses':
                         for key_resp, val_resp in val2.iteritems():
-                            val[key][key_resp] = val_resp + long(val['overCounts']['maxIntegerSize']) * val['overCounts'][key_resp]
+                            val[key][key_resp] = val_resp + int(val['overCounts']['maxIntegerSize']) * val['overCounts'][key_resp]
 
                     metric_name = '%s.%s' % (metric_base, key)
                     output.extend(cls._flatten_json(metric_name, val2, tags))
@@ -175,7 +168,7 @@ class NginxVts(AgentCheck):
                 val = 0
             output.append((metric_base, val, tags, METRIC_TYPES.get(metric_base.split('.')[-1], 'rate')))
 
-        elif isinstance(val, (int, float, long)):
+        elif isinstance(val, (int, float)):
             output.append((metric_base, val, tags, METRIC_TYPES.get(metric_base.split('.')[-1], 'rate')))
 
         return output
