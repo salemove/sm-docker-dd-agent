@@ -30,7 +30,8 @@ METRIC_TYPES = {
 }
 
 def lreplace(s, old, new):
-    return re.sub(r'^(?:%s)+' % re.escape(old), lambda m: new * (m.end() / len(old)), s)
+    return re.sub('^%s' % re.escape(old), new, s)
+
 
 class NginxVts(AgentCheck):
     """Tracks nginx metrics via virtual host traffic status module
