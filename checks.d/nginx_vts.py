@@ -110,7 +110,7 @@ class NginxVts(AgentCheck):
         # getting concatenated to the metric name
         for key in tagged_keys:
             metric_name = '%s.%s' % (metric_base, key)
-            for tag_val, data in parsed.get(key, {}).iteritems():
+            for tag_val, data in parsed.get(key, {}).items():
 
                 # skip total values
                 if tag_val != '*':
@@ -139,7 +139,7 @@ class NginxVts(AgentCheck):
                     tags = [server]
                 else:
                     tags = tags + [server]
-            for key, val2 in val.iteritems():
+            for key, val2 in val.items():
                 # Skip requestMsecs and responseMsecs, no good way to show them in DataDog
                 if key in ['requestMsecs', 'responseMsecs']:
                     continue
@@ -150,7 +150,7 @@ class NginxVts(AgentCheck):
                     if key in ['requestCounter', 'inBytes', 'outBytes']:
                         val2 = val2 + int(val['overCounts']['maxIntegerSize']) * val['overCounts'][key]
                     if key == 'responses':
-                        for key_resp, val_resp in val2.iteritems():
+                        for key_resp, val_resp in val2.items():
                             val[key][key_resp] = val_resp + int(val['overCounts']['maxIntegerSize']) * val['overCounts'][key_resp]
 
                     metric_name = '%s.%s' % (metric_base, key)
