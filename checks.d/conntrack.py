@@ -16,6 +16,7 @@ import re
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
+__version__ = "1.0.0"
 
 class Conntrack(AgentCheck):
     def check(self, instance):

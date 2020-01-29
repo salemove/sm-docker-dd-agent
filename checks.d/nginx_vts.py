@@ -15,6 +15,8 @@ import simplejson as json
 from datadog_checks.base.utils.headers import headers
 from datadog_checks.base.checks import AgentCheck
 
+__version__ = "1.0.0"
+
 METRIC_TYPES = {
     'responseMsec': 'gauge',
     'requestMsec':  'gauge',
@@ -28,6 +30,7 @@ METRIC_TYPES = {
     'maxSize':      'gauge',
     'usedSize':     'gauge'
 }
+
 
 def lreplace(s, old, new):
     return re.sub('^%s' % re.escape(old), new, s)
@@ -115,7 +118,7 @@ class NginxVts(AgentCheck):
 
                 # skip total values
                 if tag_val != '*':
-                    tag = '%s:%s' % (key, lreplace(tag_val,':','_'))
+                    tag = '%s:%s' % (key, lreplace(tag_val, ':', '_'))
                     output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
 
         # Process the rest of the keys
