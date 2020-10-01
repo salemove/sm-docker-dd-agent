@@ -38,6 +38,7 @@ GENERIC_METRICS = {
     'process_resident_memory_bytes': 'process.resident_memory_bytes',
     'process_start_time_seconds': 'process.start_time_seconds',
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
+    'istio_build': 'istio.build',
 }
 
 
@@ -100,6 +101,8 @@ MESH_METRICS = {
     'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
     'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
     'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+
+    'envoy_server_hot_restart_epoch': 'envoy.restart.epoch',
 }
 
 
@@ -303,4 +306,6 @@ ISTIOD_METRICS = {
     'process_virtual_memory_max_bytes': 'process.virtual_memory_max_bytes',
     'sidecar_injection_requests_total': 'sidecar_injection.requests_total',
     'sidecar_injection_success_total': 'sidecar_injection.success_total',
+    'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
+    'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
