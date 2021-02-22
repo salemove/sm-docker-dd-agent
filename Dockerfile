@@ -1,4 +1,4 @@
-FROM datadog/agent:7.24.0
+FROM datadog/agent:7.25.1
 
 # Required for reporting conntrack_insert_failed and conntrack_drop metrics
 RUN apt-get update && apt-get install -y --no-install-recommends conntrack \
