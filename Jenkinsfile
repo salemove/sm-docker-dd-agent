@@ -19,7 +19,7 @@ withResultReporting(slackChannel: '#tm-inf') {
     stage('Build') {
       checkout(scm)
       def shortCommit = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%h"').trim()
-      def ddVersion = sh(returnStdout: true, script: 'grep FROM Dockerfile|cut -d ":" -f2').trim()
+      def ddVersion = sh(returnStdout: true, script: 'grep FROM Dockerfile|cut -d ":" -f2|cut -d "@" -f1').trim()
       imageTag = "${ddVersion}-${shortCommit}"
       ansiColor('xterm') {
         image = docker.build(DOCKER_REPOSITORY_NAME)
