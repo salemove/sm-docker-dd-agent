@@ -4,4 +4,6 @@ FROM datadog/agent:7.25.1@sha256:538a3a9d8950ab90cfc37504a01908f8d03b65502836f66
 RUN apt-get update && apt-get install -y --no-install-recommends conntrack \
  && rm -rf /var/lib/apt/lists/*
 
+RUN agent integration install -r -t datadog-puma==1.0.0
+
 ADD checks.d/ /checks.d
